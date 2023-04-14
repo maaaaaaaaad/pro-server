@@ -1,0 +1,29 @@
+version: '3'
+services:
+  psql:
+    restart: always
+    container_name: pro-db
+    build:
+      context: ./psql
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_PASSWORD=12345
+    volumes:
+      - ./psql/pgdata:/var/lib/postgresql/data
+    ports:
+      - '1779:5432'
+
+  server:
+    restart: always
+    container_name: pro-server
+    build:
+      context: ./
+      dockerfile: Dockerfile.dev
+    env_file:
+      - ./.development.env
+    ports:
+      - '7585:8000'
+    volumes:
+      - ./:/app/pro/server
+    depends_on:
+      - psql
