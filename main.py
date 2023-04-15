@@ -1,20 +1,15 @@
-class Mock:
+def generate_combinations(arr, r):
+  if r == 0:
+    return [[]]
 
-  def __init__(self):
-    self.__count = 0
+  if not arr:
+    return []
 
-  @property
-  def count(self):
-    return self.__count
+  head = arr[0]
+  tail = arr[1:]
 
-  @count.setter
-  def count(self, n):
-    self.__count = n
+  without_head = generate_combinations(tail, r)
+  with_head = [[head] + subset
+               for subset in generate_combinations(tail, r - 1)]
 
-
-mock = Mock()
-get = mock.count
-print(get)
-
-mock.count = 100
-print(get)
+  return with_head + without_head
