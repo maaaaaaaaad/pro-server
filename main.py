@@ -48,3 +48,17 @@ class LinkedList:
       print(current.data, end=" -> ")
       current = current.next
     print("None")
+
+
+linked_list = LinkedList()
+linked_list.insert(5)
+linked_list.insert(10)
+linked_list.insert(15)
+
+linked_list.print_list()
+
+print(linked_list.search(10))
+print(linked_list.search(20))
+
+linked_list.delete(10)
+linked_list.print_list()
