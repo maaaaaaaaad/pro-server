@@ -1,64 +1,32 @@
-class ListNode:
+class Animal:
 
-  def __init__(self, data):
-    self.data = data
-    self.next = None
+  def __init__(self, name):
+    self.name = name
 
-
-class LinkedList:
-
-  def __init__(self):
-    self.head = None
-
-  def insert(self, data):
-    new_node = ListNode(data)
-    new_node.next = self.head
-    self.head = new_node
-
-  def delete(self, data):
-    current = self.head
-    prev = None
-
-    while current is not None:
-      if current.data == data:
-        break
-
-      prev = current
-      current = current.next
-
-    if current is None:
-      return "Value not found in the list."
-
-    if prev is None:
-      self.head = current.next
-    else:
-      prev.next = current.next
-
-  def search(self, data):
-    current = self.head
-    while current is not None:
-      if current.data == data:
-        return True
-      current = current.next
-    return False
-
-  def print_list(self):
-    current = self.head
-    while current is not None:
-      print(current.data, end=" -> ")
-      current = current.next
-    print("None")
+  def make_sound(self):
+    pass
 
 
-linked_list = LinkedList()
-linked_list.insert(5)
-linked_list.insert(10)
-linked_list.insert(15)
+class Dog(Animal):
 
-linked_list.print_list()
+  def __init__(self, name):
+    super().__init__(name)
 
-print(linked_list.search(10))
-print(linked_list.search(20))
+  def make_sound(self):
+    print("ziral!")
 
-linked_list.delete(10)
-linked_list.print_list()
+
+class Cat(Animal):
+
+  def __init__(self, name):
+    super().__init__(name)
+
+  def make_sound(self):
+    print("ny~")
+
+
+d = Dog("b")
+c = Cat("n")
+
+d.make_sound()
+c.make_sound()
