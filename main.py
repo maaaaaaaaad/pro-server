@@ -1,24 +1,26 @@
-def cost(land, P, Q, height):
-  total_cost = 0
-  for row in land:
-    for block in row:
-      if block > height:
-        total_cost += (block - height) * Q
-      else:
-        total_cost += (height - block) * P
-  return total_cost
+import sys
 
 
 def solution(land, P, Q):
-  flatten = sum(land, [])
-  min_height = min(flatten)
-  max_height = max(flatten)
 
-  while min_height < max_height:
-    mid_height = (min_height + max_height) // 2
-    if cost(land, P, Q, mid_height) < cost(land, P, Q, mid_height + 1):
-      max_height = mid_height
+  def calculate_cost(height):
+    inc = sum(max(0, h - height) for h in flatten) * Q
+    dec = sum(max(0, height - h) for h in flatten) * P
+    return inc + dec
+
+  flatten = [h for row in land for h in row]
+  flatten.sort()
+
+  left, right = flatten[0], flatten[-1]
+  answer = sys.maxsize
+
+  while left <= right:
+    mid = (left + right) // 2
+    cost = calculate_cost(mid)
+    if cost <= calculate_cost(mid + 1):
+      answer = min(answer, cost)
+      right = mid - 1
     else:
-      min_height = mid_height + 1
+      left = mid + 1
 
-  return cost(land, P, Q, min_height)
+  return answer
