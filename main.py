@@ -1,39 +1,24 @@
-from heapq import heappop, heappush
+def cost(land, P, Q, height):
+  total_cost = 0
+  for row in land:
+    for block in row:
+      if block > height:
+        total_cost += (block - height) * Q
+      else:
+        total_cost += (height - block) * P
+  return total_cost
 
 
-def solution(n, start, end, roads, traps):
-  INF = int(1e9)
-  start -= 1
-  end -= 1
-  graph = [[[] for _ in range(n)] for _ in range(2)]
-  trap_set = set(traps)
+def solution(land, P, Q):
+  flatten = sum(land, [])
+  min_height = min(flatten)
+  max_height = max(flatten)
 
-  for x, y, cost in roads:
-    x -= 1
-    y -= 1
-    graph[0][x].append((y, cost))
-    graph[1][y].append((x, cost))
-    if x + 1 in trap_set:
-      graph[1][x].append((y, cost))
-    if y + 1 in trap_set:
-      graph[0][y].append((x, cost))
+  while min_height < max_height:
+    mid_height = (min_height + max_height) // 2
+    if cost(land, P, Q, mid_height) < cost(land, P, Q, mid_height + 1):
+      max_height = mid_height
+    else:
+      min_height = mid_height + 1
 
-  dist = [[INF] * n for _ in range(1 << len(trap_set))]
-  trap_dict = {trap - 1: i for i, trap in enumerate(traps)}
-  state = sum(1 << trap_dict[trap - 1] for trap in traps if trap - 1 < start)
-  dist[state][start] = 0
-  queue = [(0, start, state)]
-
-  while queue:
-    time, node, state = heappop(queue)
-    if node == end:
-      return time
-    trap_here = (1 << trap_dict[node]) if node + 1 in trap_set else 0
-    for next_node, cost in graph[state >> trap_dict[node]
-                                 & 1 if trap_here else state & 1 ^ 1][node]:
-      next_state = (state ^ trap_here) if (next_node +
-                                           1 in trap_set) else state
-      if time + cost < dist[next_state][next_node]:
-        dist[next_state][next_node] = time + cost
-        heappush(queue, (time + cost, next_node, next_state))
-  return -1
+  return cost(land, P, Q, min_height)
