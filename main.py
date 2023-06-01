@@ -1,50 +1,89 @@
-def solution(numbers):
-  weight_map = [
-    [1, 7, 6, 7, 5, 4, 5, 3, 2, 3],
-    [7, 1, 2, 4, 2, 3, 5, 4, 5, 6],
-    [6, 2, 1, 2, 3, 2, 3, 5, 4, 5],
-    [7, 4, 2, 1, 5, 3, 2, 6, 5, 4],
-    [5, 2, 3, 5, 1, 2, 4, 2, 3, 5],
-    [4, 3, 2, 3, 2, 1, 2, 3, 2, 3],
-    [5, 5, 3, 2, 4, 2, 1, 5, 3, 2],
-    [3, 4, 5, 6, 2, 3, 5, 1, 2, 4],
-    [2, 5, 4, 5, 3, 2, 3, 2, 1, 2],
-    [3, 6, 5, 4, 5, 3, 2, 4, 2, 1],
-  ]
+import collections
+import math
 
-  dictionary = [[None] * 10 for _ in range(10)]
 
-  dictionary[4][6] = 0
-  dictionary[6][4] = 0
+def bfs(land, height, groups, x, y, group_number):
+  move = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+  queue = collections.deque([(x, y)])
+  groups[x][y] = group_number
 
-  for number in map(int, numbers):
-    newDict = [[None] * 10 for _ in range(10)]
+  while queue:
+    now = queue.popleft()
+    for i in range(4):
+      new_x = now[0] + move[i][0]
+      new_y = now[1] + move[i][1]
+      if new_x < 0 or new_y < 0 or new_x >= len(groups) or new_y >= len(
+          groups[0]) or groups[new_x][new_y] != 0:
+        continue
+      if abs(land[new_x][new_y] - land[now[0]][now[1]]) <= height:
+        queue.append((new_x, new_y))
+        groups[new_x][new_y] = group_number
 
-    for idx1, row in enumerate(dictionary):
-      for idx2, el in enumerate(row):
-        if el is not None:
-          value = el
-          if idx1 == number or idx2 == number:
-            resultValue = min(newDict[idx1][idx2], value +
-                              1) if newDict[idx1][idx2] else value + 1
-            newDict[idx1][idx2] = resultValue
-            newDict[idx2][idx1] = resultValue
-          else:
-            weightValue1 = weight_map[idx1][number]
-            weightValue2 = weight_map[idx2][number]
 
-            resultValue1 = min(
-              newDict[idx1][number], value +
-              weightValue2) if newDict[idx1][number] else value + weightValue2
-            resultValue2 = min(
-              newDict[idx2][number], value +
-              weightValue1) if newDict[idx2][number] else value + weightValue1
+def get_groups_wieghts(land, groups, height):
+  move = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+  weights = collections.defaultdict(lambda: math.inf)
 
-            newDict[idx1][number] = resultValue1
-            newDict[number][idx1] = resultValue1
-            newDict[number][idx2] = resultValue2
-            newDict[idx2][number] = resultValue2
+  for i in range(len(groups)):
+    for j in range(len(groups[0])):
+      now = groups[i][j]
+      for dx, dy in move:
+        new_x, new_y = i + dx, j + dy
+        if new_x < 0 or new_y < 0 or new_x >= len(groups) or new_y >= len(
+            groups[0]) or groups[new_x][new_y] == now:
+          continue
 
-    dictionary = newDict
-  filtered_dict = [min(filter(None, el)) for el in dictionary if any(el)]
-  return min(filtered_dict) if filtered_dict else None
+        dist = abs(land[new_x][new_y] - land[i][j])
+        weights[(now, groups[new_x][new_y])] = min(
+          dist, weights[(now, groups[new_x][new_y])])
+
+  return weights
+
+
+def find(x, root):
+  if x == root[x]:
+    return x
+  else:
+    r = find(root[x], root)
+    root[x] = r
+    return r
+
+
+def union(x, y, root):
+  x_root = find(x, root)
+  y_root = find(y, root)
+  root[y_root] = x_root
+
+
+def kruskal(group_weights, groups):
+  sum = 0
+  roots = {_: _ for _ in range(1, groups)}
+
+  for (x, y), value in group_weights:
+    if find(x, roots) != find(y, roots):
+      sum += value
+      union(x, y, roots)
+    if len(roots.items()) == 1:
+      return sum
+  return sum
+
+
+def solution(land, height):
+  answer = 0
+  row = len(land)
+  col = len(land[0])
+
+  groups = [[0 for _ in range(col)] for _ in range(row)]
+
+  group_number = 1
+  for i in range(row):
+    for j in range(col):
+      if groups[i][j] == 0:
+        bfs(land, height, groups, i, j, group_number)
+        group_number += 1
+
+  groups_weights = get_groups_wieghts(land, groups, height)
+  groups_weights = sorted(groups_weights.items(), key=lambda x: x[1])
+
+  answer = kruskal(groups_weights, group_number)
+  return answer
